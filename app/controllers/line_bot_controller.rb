@@ -11,6 +11,13 @@ class LineBotController < ApplicationController
     events = client.parse_events_from(body)
     events.each do |event|
       case event
+      when Line::Bot::Event::Follow
+        userId = event["source"]["userId"]
+        User.find_or_create_by(uid: userId)
+      when Line::Bot::Event::Unfollow
+        userId = event["source"]["userId"]
+        user = User.find_by(uid: userId)
+        user.destroy if user.present?
       when Line::Bot::Event::Message
         case event.type
         when Line::Bot::Event::MessageType::Text
